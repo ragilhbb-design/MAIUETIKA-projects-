@@ -1,0 +1,153 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile with reality score and activity tracking",
+      "type": "object",
+      "properties": {
+        "nama": {
+          "type": "string",
+          "description": "User display name"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the user account was created. Client must submit FieldValue.serverTimestamp()"
+        },
+        "lastActive": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the user was last active. Client must submit FieldValue.serverTimestamp()"
+        },
+        "skorRealitasTerakhir": {
+          "type": "number",
+          "description": "Latest overall reality score between 0 and 100"
+        }
+      },
+      "required": ["nama", "createdAt", "lastActive", "skorRealitasTerakhir"]
+    },
+    "Session": {
+      "title": "Session",
+      "description": "A Socratic cognitive diagnostic session with reality map, root causes, scenarios, and ZEBRA action",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth user ID of the session owner"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp. Client must submit FieldValue.serverTimestamp()"
+        },
+        "ceritaPengguna": {
+          "type": "string",
+          "description": "User story/complaint entered during onboarding"
+        },
+        "diagnosis": {
+          "type": "string",
+          "description": "AI Socratic analysis explaining the core issues"
+        },
+        "petaRealitas": {
+          "type": "object",
+          "description": "8-dimension reality scores: keuangan, keluarga, karier, relasi, tujuan, risiko, psikologi, kesehatan"
+        },
+        "analisisAkarMasalah": {
+          "type": "array",
+          "description": "4 contributing root causes leading to the core issue"
+        },
+        "masalahUtama": {
+          "type": "string",
+          "description": "The distilled core problem"
+        },
+        "tingkatRisiko": {
+          "type": "number",
+          "description": "Risk percentage (0-100)"
+        },
+        "tingkatKepercayaanAI": {
+          "type": "number",
+          "description": "AI confidence level (0-100)"
+        },
+        "skenario": {
+          "type": "array",
+          "description": "Array of 3 scenarios: Stabil, Berani, Agresif"
+        },
+        "rekomendasiSkenario": {
+          "type": "string",
+          "description": "AI recommendation of which scenario to pursue"
+        },
+        "zebra": {
+          "type": "object",
+          "description": "Today's priority action: instruksi, dampakPoin, status (pending|done|failed)"
+        },
+        "evaluasiMingguan": {
+          "type": "object",
+          "description": "Optional weekly evaluation: status, cerita, createdAt"
+        }
+      },
+      "required": [
+        "uid",
+        "createdAt",
+        "ceritaPengguna",
+        "diagnosis",
+        "petaRealitas",
+        "analisisAkarMasalah",
+        "masalahUtama",
+        "tingkatRisiko",
+        "tingkatKepercayaanAI",
+        "skenario",
+        "rekomendasiSkenario",
+        "zebra"
+      ]
+    },
+    "Evaluation": {
+      "title": "Evaluation",
+      "description": "Weekly reflection and progress review",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth user ID"
+        },
+        "sessionId": {
+          "type": "string",
+          "description": "Associated session ID"
+        },
+        "status": {
+          "type": "string",
+          "description": "Evaluation outcome (lebih_baik|sama|lebih_buruk)"
+        },
+        "cerita": {
+          "type": "string",
+          "description": "User reflection story"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of evaluation. Client must submit FieldValue.serverTimestamp()"
+        }
+      },
+      "required": ["uid", "sessionId", "status", "cerita", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Stores user profile and latest reality score"
+    },
+    "/sessions/{sessionId}": {
+      "schema": {
+        "$ref": "#/entities/Session"
+      },
+      "description": "Stores full Socratic diagnosis sessions, scenarios, and ZEBRA actions"
+    },
+    "/evaluations/{evaluationId}": {
+      "schema": {
+        "$ref": "#/entities/Evaluation"
+      },
+      "description": "Stores weekly reflection records"
+    }
+  }
+}

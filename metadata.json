@@ -1,0 +1,6 @@
+{
+  "name": "MAIEUTIKA",
+  "description": "Google Maps Kehidupan - Co-partner kognitif AI Socratic untuk memetakan realitas, menganalisis akar masalah, simulasi skenario, dan langkah ZEBRA.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
