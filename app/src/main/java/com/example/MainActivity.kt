@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.AppScreen
 import com.example.ui.ChatViewModel
+import com.example.ui.MaieutikaViewModel
 import com.example.ui.MainViewModel
 import com.example.ui.auth.AuthScreen
 import com.example.ui.screens.ArchiveScreen
@@ -55,9 +56,8 @@ import com.example.ui.theme.MyApplicationTheme
 import com.example.ui.theme.ObsidianBlack
 import com.example.ui.theme.ObsidianCard
 import com.example.ui.theme.SlateGray
-import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
+import androidx.compose.ui.platform.LocalContext
+import com.example.data.repository.UserSessionManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,32 +74,35 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppRoot() {
-    var currentUser by remember { mutableStateOf(Firebase.auth.currentUser) }
+    val context = LocalContext.current
+    val sessionManager = remember { UserSessionManager(context) }
+    var isLoggedIn by remember { mutableStateOf(sessionManager.isLoggedIn()) }
 
-    DisposableEffect(Unit) {
-        val listener = FirebaseAuth.AuthStateListener { auth ->
-            currentUser = auth.currentUser
-        }
-        Firebase.auth.addAuthStateListener(listener)
-        onDispose {
-            Firebase.auth.removeAuthStateListener(listener)
-        }
-    }
-
-    if (currentUser == null) {
+    if (!isLoggedIn) {
         AuthScreen(
-            onAuthSuccess = {
-                currentUser = Firebase.auth.currentUser
+            onAuthSuccess = { name ->
+                sessionManager.saveUser(name)
+                isLoggedIn = true
             }
         )
     } else {
         val viewModel: MainViewModel = viewModel()
-        AppMainContent(viewModel = viewModel)
+        AppMainContent(
+            viewModel = viewModel,
+            onLogout = {
+                sessionManager.logout()
+                viewModel.logout()
+                isLoggedIn = false
+            }
+        )
     }
 }
 
 @Composable
-fun AppMainContent(viewModel: MainViewModel) {
+fun AppMainContent(
+    viewModel: MainViewModel,
+    onLogout: () -> Unit = {}
+) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -224,13 +227,13 @@ fun AppMainContent(viewModel: MainViewModel) {
                 AppScreen.DIAGNOSIS -> DiagnosisScreen(viewModel = viewModel, uiState = uiState)
                 AppScreen.SCENARIO -> ScenarioScreen(viewModel = viewModel, uiState = uiState)
                 AppScreen.ZEBRA -> ZebraScreen(viewModel = viewModel, uiState = uiState)
-                AppScreen.ARCHIVE -> ArchiveScreen(viewModel = viewModel, uiState = uiState)
+                AppScreen.ARCHIVE -> ArchiveScreen(viewModel = viewModel, uiState = uiState, onLogout = onLogout)
                 AppScreen.REALITY_TRENDS -> RealityTrendsScreen(viewModel = viewModel, uiState = uiState)
                 AppScreen.GUIDE -> GuideScreen(viewModel = viewModel)
                 AppScreen.CHAT -> {
-                    val chatViewModel: ChatViewModel = viewModel()
+                    val maieutikaViewModel: MaieutikaViewModel = viewModel()
                     ChatScreen(
-                        chatViewModel = chatViewModel,
+                        viewModel = maieutikaViewModel,
                         onBack = { viewModel.navigateTo(AppScreen.ONBOARDING) }
                     )
                 }

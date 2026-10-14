@@ -83,4 +83,106 @@ class MaieutikaUnitTest {
         assertEquals(false, state.isTyping)
         assertNull(state.errorMessage)
     }
+
+    @Test
+    fun testMaieutikaViewModel_initialStateAndProbingQuestions() {
+        val maieutikaViewModel = com.example.ui.MaieutikaViewModel()
+        val state = maieutikaViewModel.uiState.value
+        assertNotNull(state)
+        assertEquals(1, state.messages.size)
+        assertEquals(false, state.messages.first().isUser)
+        assertTrue(state.messages.first().text.contains("MAIEUTIKA"))
+        // Confirms it declares not providing immediate answers
+        assertTrue(state.messages.first().text.contains("tidak akan menyodorkan jawaban"))
+        assertEquals(false, state.isTyping)
+        assertNull(state.errorMessage)
+        assertTrue(state.suggestedProbingQuestions.isNotEmpty())
+    }
+
+    @Test
+    fun testMaieutikaViewModel_systemPromptConfiguredAsSocraticCoPartner() {
+        val maieutikaViewModel = com.example.ui.MaieutikaViewModel()
+        val prompt = maieutikaViewModel.systemPrompt
+        assertTrue(prompt.contains("Socratic Co-Partner"))
+        assertTrue(prompt.contains("JANGAN PERNAH memberikan resep solusi langsung"))
+        assertTrue(prompt.contains("Pertanyaan Menyelidik / Probing Questions"))
+        assertTrue(prompt.contains("KUBAH ETIKA"))
+    }
+
+    @Test
+    fun testMaieutikaViewModel_socraticProbingHeuristicsAskQuestions() {
+        val maieutikaViewModel = com.example.ui.MaieutikaViewModel()
+        val response = maieutikaViewModel.generateLocalSocraticProbingResponse("Saya sangat cemas dan takut gagal.")
+        assertTrue(response.contains("?")) // Must ask probing question
+        assertTrue(response.contains("Kecemasan"))
+    }
+
+    @Test
+    fun testRbssEngineDeterministicScoring() {
+        val rma = com.example.data.model.RmaAnalysis(
+            confirmedInterests = listOf("Kejernihan pikiran", "Stabilitas emosional")
+        )
+        val hos = com.example.data.model.HosAnalysis(
+            adequacyScore = 80,
+            missingData = listOf("Data respon bos"),
+            inconsistencies = listOf("Takut tapi menolak bertindak")
+        )
+        val kkz = com.example.data.model.KkzCalculation(
+            readinessIndex = 70
+        )
+        val zebra = com.example.data.model.ZebraAction(
+            status = "pending"
+        )
+        val rbss = com.example.data.repository.RbssEngine.calculateInitialRbss(
+            rma = rma,
+            hos = hos,
+            kkz = kkz,
+            zebra = zebra,
+            tingkatRisiko = 40.0
+        )
+
+        assertTrue(rbss.totalRealityScore in 30.0..95.0)
+        assertTrue(rbss.informationAdequacyScore > 50.0)
+        assertTrue(rbss.auditTrail.isNotEmpty())
+        assertTrue(rbss.auditTrail.first().contains("Inisialisasi Analisis Sistem"))
+    }
+
+    @Test
+    fun testRbssEngineExecutionWithObservationUpdatesAuditTrail() {
+        val initialRbss = com.example.data.model.RbssScore(
+            totalRealityScore = 55.0,
+            executionScore = 50.0,
+            auditTrail = listOf("Init")
+        )
+        val updated = com.example.data.repository.RbssEngine.recalculateOnActionExecution(
+            currentRbss = initialRbss,
+            newStatus = "done",
+            observation = "Telah menuliskan 3 ketakutan di buku catatan pagi ini",
+            impactPoints = 14
+        )
+        assertTrue(updated.totalRealityScore > initialRbss.totalRealityScore)
+        assertTrue(updated.executionScore > initialRbss.executionScore)
+        assertEquals(2, updated.auditTrail.size)
+        assertTrue(updated.auditTrail.last().contains("Aksi Selesai"))
+    }
+
+    @Test
+    fun testRecalibrationLoopUpdatesHypothesesAndHos() {
+        val service = GeminiService()
+        val initialSession = com.example.data.model.SocraticSession(
+            id = "test_sess_1",
+            masalahUtama = "Kabut persepsi awal",
+            analisisAkarMasalah = listOf("Asumsi tidak diuji di lapangan")
+        )
+        val recalibrated = service.recalibrateAnalysisWithObservation(
+            session = initialSession,
+            observationText = "Langkah telah diuji dan menghasilkan bukti positif",
+            outcomeStatus = "done"
+        )
+
+        val rma = recalibrated.getParsedRma()
+        assertTrue(rma.mechanismHypotheses.first().contains("TERVERIFIKASI EMPIRIS"))
+        assertEquals("done", recalibrated.getParsedZebra().status)
+        assertTrue(recalibrated.getParsedRbss().auditTrail.size >= 2)
+    }
 }

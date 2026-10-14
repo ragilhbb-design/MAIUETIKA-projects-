@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDone
@@ -63,6 +64,7 @@ import java.util.Locale
 fun ArchiveScreen(
     viewModel: MainViewModel,
     uiState: UiState,
+    onLogout: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     BackHandler {
@@ -96,26 +98,39 @@ fun ArchiveScreen(
             }
 
             Text(
-                text = "ARSIP SESI FIRESTORE",
+                text = "ARSIP SESI SOKRATIK",
                 style = MaterialTheme.typography.titleMedium,
                 color = GoldLight,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.sp
             )
 
-            IconButton(
-                onClick = { viewModel.navigateTo(AppScreen.ONBOARDING) },
-                modifier = Modifier.testTag("new_session_top_button")
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Diagnosis Baru",
-                    tint = GoldAccent
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(
+                    onClick = { viewModel.navigateTo(AppScreen.ONBOARDING) },
+                    modifier = Modifier.testTag("new_session_top_button")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Diagnosis Baru",
+                        tint = GoldAccent
+                    )
+                }
+
+                IconButton(
+                    onClick = { onLogout() },
+                    modifier = Modifier.testTag("logout_top_button")
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Logout,
+                        contentDescription = "Ganti Profil / Keluar",
+                        tint = SlateGray
+                    )
+                }
             }
         }
 
-        // Firebase Cloud Sync indicator banner
+        // Sync & Profile indicator banner
         Surface(
             color = Color(0xFF141F16),
             border = BorderStroke(1.dp, Color(0xFF22552B)),
@@ -136,7 +151,7 @@ fun ArchiveScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Tersimpan di Cloud Firebase Firestore (${sessions.size} sesi)",
+                    text = "Profil: ${uiState.userName.ifBlank { "Pencari Kebijakan" }} • Tersimpan ${sessions.size} sesi",
                     style = MaterialTheme.typography.labelSmall,
                     color = SoftWhite
                 )

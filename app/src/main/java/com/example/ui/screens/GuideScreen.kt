@@ -3,7 +3,6 @@ package com.example.ui.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,13 +20,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.FactCheck
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CompassCalibration
+import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Card
@@ -41,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontStyle
@@ -95,7 +96,7 @@ fun GuideScreen(
             }
 
             Text(
-                text = "PANDUAN & FILOSOFI",
+                text = "ARSITEKTUR & PANDUAN",
                 style = MaterialTheme.typography.titleMedium,
                 color = GoldLight,
                 fontWeight = FontWeight.Bold,
@@ -143,7 +144,7 @@ fun GuideScreen(
                     )
 
                     Text(
-                        text = "Membangun AI yang Melihat Sebelum Menjawab",
+                        text = "Reality Intelligence & Adaptive Decision System",
                         style = MaterialTheme.typography.titleSmall.copy(
                             color = SoftWhite,
                             fontWeight = FontWeight.Medium
@@ -154,7 +155,7 @@ fun GuideScreen(
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Text(
-                        text = "\"Diagnosis harus mendahului jawaban. Kecepatan tanpa pemahaman adalah ilusi kognitif.\"",
+                        text = "\"Diagnosis harus mendahului jawaban. Sistem harus membantu mengubah pemahaman pola menjadi ketepatan tindakan di dunia nyata.\"",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontStyle = FontStyle.Italic,
                             color = GoldLight,
@@ -167,96 +168,9 @@ fun GuideScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Pengantar Section
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = ObsidianCard),
-                border = BorderStroke(1.dp, ObsidianBorder),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(18.dp)) {
-                    Text(
-                        text = "Pengantar & Fondasi Konseptual",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = GoldLight,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Fokus MAIEUTIKA adalah mentransformasikan log pemikiran dan percakapan manusia menjadi narasi sistematis sebagai fondasi kognitif. AI di sini tidak bertindak sebagai mesin penjawab otomatis, melainkan bidan pemikiran (maieutik) yang membantu Anda melahirkan kejernihan dari dalam diri sendiri.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = SoftWhite,
-                        lineHeight = 22.sp
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Bab 1 Section
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = ObsidianCard),
-                border = BorderStroke(1.dp, ObsidianBorder),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(modifier = Modifier.padding(18.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                            .background(GoldContainer),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "1",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = GoldAccent,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = "Bab 1: Krisis Cara Berpikir",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = GoldLight,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = "Perkembangan AI modern menghasilkan kemampuan menjawab yang luar biasa cepat, namun kecepatan tidak selalu identik dengan pemahaman sejati.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = SoftWhite,
-                        lineHeight = 22.sp
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Surface(
-                        color = Color(0xFF13131D),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(
-                            text = "Setiap keluhan dan pertanyaan dipandang sebagai gejala (symptom) yang memiliki kepentingan, mekanisme, dan konteks tersembunyi. Solusi tidak pernah dirumuskan sebelum diagnosis realitas selesai.",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = SlateGray,
-                            modifier = Modifier.padding(12.dp),
-                            lineHeight = 18.sp
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Kerangka Buku (9 Pilar)
+            // 5 Komponen Inti Arsitektur
             Text(
-                text = "9 Kerangka Pilar MAIEUTIKA",
+                text = "5 Komponen Arsitektur Inti MAIEUTIKA",
                 style = MaterialTheme.typography.titleMedium,
                 color = GoldLight,
                 fontWeight = FontWeight.Bold,
@@ -267,66 +181,123 @@ fun GuideScreen(
 
             GuidePillarItem(
                 number = "1",
-                title = "Landasan Filosofis MAIEUTIKA",
-                desc = "Metode Socrates: bidan kognitif yang membedah kepalsuan asumsi agar pengguna melihat kebenaran objektif.",
-                icon = Icons.Default.Lightbulb
+                title = "RMA: Root Mechanism Analysis",
+                desc = "Menganalisis mekanisme yang melahirkan masalah. Membedakan keinginan yang dinyatakan, kepentingan mendasari, bukti pendukung, hipotesis mekanisme, titik intervensi realistis, dan ketidakpastian.",
+                icon = Icons.Default.AccountTree
             )
 
             GuidePillarItem(
                 number = "2",
-                title = "Root Mechanism Analysis (RMA)",
-                desc = "Analisis 4 tingkat mekanisme akar masalah yang mengerucut pada satu Masalah Utama yang dapat diintervensi.",
-                icon = Icons.Default.Psychology
-            )
-
-            GuidePillarItem(
-                number = "3",
-                title = "Diagnosis Engine",
-                desc = "Mesin penalaran yang menolak jawaban cepat dan memprioritaskan pemahaman mekanisme terdalam.",
+                title = "HOS: Human Observational System",
+                desc = "Membaca kondisi nyata manusia dan lingkungan pada 8 dimensi objektif. Setiap data memiliki provenance yang jelas (Dilaporkan Pengguna, Kalkulasi Data, Observasi Nyata) dan mendeteksi data yang hilang.",
                 icon = Icons.Default.Visibility
             )
 
             GuidePillarItem(
+                number = "3",
+                title = "OIE: Observasi - Interaksi - Eksekusi",
+                desc = "Menghubungkan observasi dengan dialog sokratik elenchus dan eksekusi tindakan nyata (ZEBRA). Setiap aksi memuat tujuan, alasan, sumber daya, risiko, indikator hasil, dan batas evaluasi.",
+                icon = Icons.AutoMirrored.Filled.FactCheck
+            )
+
+            GuidePillarItem(
                 number = "4",
-                title = "Reality Mapping (Peta Realitas)",
-                desc = "Pemetaan 8 dimensi terukur: Keuangan, Keluarga, Karier, Relasi, Tujuan, Risiko, Psikologi, dan Kesehatan.",
-                icon = Icons.Default.CompassCalibration
+                title = "KKZ: Kalkulasi Kesiapan Zaman & Kondisi",
+                desc = "Menghitung kesiapan riil pengguna: kapasitas energi mental, waktu harian, tingkat friksi lingkungan, kendala struktural, dan risiko ketergantungan agar aksi tidak melampaui daya dukung nyata.",
+                icon = Icons.Default.Speed
             )
 
             GuidePillarItem(
                 number = "5",
-                title = "Cognitive Operating System",
-                desc = "Sistem operasi nalar yang membantu menertibkan kekacauan pikiran dan emosi ke dalam struktur keputusan.",
-                icon = Icons.Default.AutoAwesome
-            )
-
-            GuidePillarItem(
-                number = "6",
-                title = "Arsitektur Aplikasi",
-                desc = "Alur 5 tahap: Onboarding → Diagnosis Socrates → Simulasi Skenario → ZEBRA Hari Ini → Evaluasi Mingguan.",
-                icon = Icons.Default.Timeline
-            )
-
-            GuidePillarItem(
-                number = "7",
-                title = "Validasi pada AI dan Manusia",
-                desc = "Memvalidasi apakah rencana hipotetis bekerja di lapangan melalui umpan balik mingguan nyata.",
-                icon = Icons.Default.CheckCircle
-            )
-
-            GuidePillarItem(
-                number = "8",
-                title = "Etika dan Tata Kelola (Kubah Etika)",
-                desc = "Menolak tegas segala permintaan manipulatif, curang, atau destruktif; mengarahkan nalar pada integritas.",
+                title = "RBSS: Reality-Based Scoring System",
+                desc = "Sistem penilaian realitas berbasis bukti matematis: 25% Ketercukupan Fakta + 25% Penyelarasan Persepsi + 30% Eksekusi Nyata + 20% Resiliensi Risiko. Dilengkapi jejak audit (audit trail) transparan.",
                 icon = Icons.Default.Security
             )
 
-            GuidePillarItem(
-                number = "9",
-                title = "Blueprint Implementasi & ZEBRA",
-                desc = "Menerjemahkan visi makro menjadi 1 tindakan mikro konkret hari ini yang menghasilkan peningkatan Skor Realitas.",
-                icon = Icons.Default.Timeline
-            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Siklus Penutup
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = ObsidianCard),
+                border = BorderStroke(1.dp, GoldAccent),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Sync,
+                            contentDescription = null,
+                            tint = GoldAccent,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = "Siklus Umpan Balik Berkelanjutan",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = GoldLight,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Text(
+                        text = "RMA → HOS → OIE → KKZ → RBSS\n  ↓\nTINDAKAN NYATA (ZEBRA)\n  ↓\nOBSERVASI HASIL DI LAPANGAN\n  ↓\nPEMBARUAN ANALISIS & REKALIBRASI HIPOTESIS",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = GoldAccent,
+                            lineHeight = 22.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp)
+                    )
+
+                    Text(
+                        text = "Ketika pengguna menjalankan aksi dan mencatat fakta yang terjadi di dunia nyata, sistem menyerap bukti tersebut kembali ke dalam hipotesis mekanisme (RMA), memperbarui status verifikasi HOS, dan mengkalibrasi ulang skor realitas tanpa halusinasi.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SoftWhite,
+                        lineHeight = 18.sp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Kubah Etika
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = ObsidianCard),
+                border = BorderStroke(1.dp, ObsidianBorder),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(18.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Security,
+                            contentDescription = null,
+                            tint = Color(0xFFD4AF37),
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "Kubah Etika (Ethical Dome)",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = GoldLight,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "MAIEUTIKA menolak memandu tindakan manipulatif, curang, atau destruktif. Solusi sejati hanya lahir dari kejujuran melihat kenyataan dan integritas moral.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = SlateGray,
+                        lineHeight = 18.sp
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(30.dp))
         }

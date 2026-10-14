@@ -8,8 +8,7 @@ import com.example.data.model.SocraticSession
 import com.example.data.model.UserProfile
 import com.example.data.repository.FirebaseRepository
 import com.example.data.repository.GeminiService
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
+import com.example.data.repository.UserSessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,11 +39,13 @@ data class UiState(
     val errorMessage: String? = null,
     val ethicalViolationMessage: String? = null,
     val isZebraUpdating: Boolean = false,
-    val showWeeklyDialog: Boolean = false
+    val showWeeklyDialog: Boolean = false,
+    val recalibrationSuccessMessage: String? = null
 )
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
+    private val sessionManager = UserSessionManager(application)
     private val repository = FirebaseRepository(application)
     private val geminiService = GeminiService()
 
@@ -52,21 +53,21 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     init {
-        val currentUser = Firebase.auth.currentUser
-        if (currentUser != null) {
-            val displayName = currentUser.displayName ?: ""
-            _uiState.value = _uiState.value.copy(userName = displayName)
-            observeUserData(currentUser.uid)
+        val savedName = sessionManager.getUserName()
+        if (savedName.isNotBlank()) {
+            _uiState.value = _uiState.value.copy(userName = savedName)
         }
+        val uid = sessionManager.getUserId()
+        observeUserData(uid)
     }
 
     fun onUserAuthenticated() {
-        val currentUser = Firebase.auth.currentUser ?: return
-        val displayName = currentUser.displayName ?: ""
-        if (_uiState.value.userName.isBlank()) {
-            _uiState.value = _uiState.value.copy(userName = displayName)
+        val savedName = sessionManager.getUserName()
+        if (savedName.isNotBlank()) {
+            _uiState.value = _uiState.value.copy(userName = savedName)
         }
-        observeUserData(currentUser.uid)
+        val uid = sessionManager.getUserId()
+        observeUserData(uid)
     }
 
     private fun observeUserData(uid: String) {
@@ -107,6 +108,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateUserName(name: String) {
+        sessionManager.saveUser(name)
         _uiState.value = _uiState.value.copy(userName = name)
     }
 
@@ -134,13 +136,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.value = _uiState.value.copy(errorMessage = null)
     }
 
+    fun clearRecalibrationMessage() {
+        _uiState.value = _uiState.value.copy(recalibrationSuccessMessage = null)
+    }
+
     fun toggleWeeklyDialog(show: Boolean) {
         _uiState.value = _uiState.value.copy(showWeeklyDialog = show)
     }
 
+    fun logout() {
+        sessionManager.logout()
+        _uiState.value = UiState()
+    }
+
     fun startDiagnosis() {
-        val uid = Firebase.auth.currentUser?.uid ?: return
-        val name = _uiState.value.userName.ifBlank { "Pencari Kebijakan" }
+        val uid = repository.requireUserId()
+        val name = _uiState.value.userName.ifBlank {
+            sessionManager.getUserName().ifBlank { "Pencari Kebijakan" }
+        }
         val story = _uiState.value.userStory.trim()
 
         if (story.isBlank()) {
@@ -166,7 +179,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                     return@launch
                 }
 
-                // Save session into Firestore
+                // Save session
                 val sessionId = repository.saveSession(result.session)
 
                 val sessionWithId = result.session.copy(id = sessionId)
@@ -187,28 +200,47 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun updateZebraStatus(newStatus: String) {
-        val sessionId = _uiState.value.activeSessionId ?: return
+        executeZebraActionWithObservation(
+            newStatus = newStatus,
+            observation = if (newStatus == "done") "Aksi terlaksana sesuai instruksi di dunia nyata." else "Mengalami kendala saat eksekusi."
+        )
+    }
+
+    /**
+     * SIKLUS PENUTUP: TINDAKAN NYATA -> OBSERVASI HASIL -> PEMBARUAN ANALISIS
+     * Menguji hipotesis mekanisme dengan bukti nyata, lalu memperbarui RMA, HOS, KKZ, dan RBSS.
+     */
+    fun executeZebraActionWithObservation(newStatus: String, observation: String) {
         val currentSession = _uiState.value.currentSession ?: return
-        val zebra = currentSession.getParsedZebra()
+        val sessionId = currentSession.id
 
         _uiState.value = _uiState.value.copy(isZebraUpdating = true)
 
         viewModelScope.launch {
             try {
-                repository.updateZebraStatus(sessionId, newStatus, zebra.dampakPoin)
+                // 1. Jalankan kalibrasi ulang analisis
+                val recalibratedSession = geminiService.recalibrateAnalysisWithObservation(
+                    session = currentSession,
+                    observationText = observation.ifBlank { "Tindakan dijalankan pada jadwal yang ditentukan." },
+                    outcomeStatus = newStatus
+                )
 
-                val updatedZebraMap = HashMap(currentSession.zebra)
-                updatedZebraMap["status"] = newStatus
-                val updatedSession = currentSession.copy(zebra = updatedZebraMap)
+                // 2. Simpan pembaruan ke repository
+                repository.updateSession(recalibratedSession)
 
                 _uiState.value = _uiState.value.copy(
-                    currentSession = updatedSession,
-                    isZebraUpdating = false
+                    currentSession = recalibratedSession,
+                    isZebraUpdating = false,
+                    recalibrationSuccessMessage = if (newStatus == "done") {
+                        "Siklus Selesai: Bukti observasi nyata telah diserap ke dalam Analisis Mekanisme (RMA) dan Skor Realitas (RBSS) diperbarui!"
+                    } else {
+                        "Kalibrasi Ulang: Resistensi empiris dicatat untuk penyesuaian strategi tindakan."
+                    }
                 )
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(
                     isZebraUpdating = false,
-                    errorMessage = "Gagal memperbarui status ZEBRA: ${e.message}"
+                    errorMessage = "Gagal memperbarui analisis tindakan: ${e.message}"
                 )
             }
         }

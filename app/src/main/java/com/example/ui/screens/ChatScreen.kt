@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +19,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -28,6 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.DeleteSweep
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,6 +59,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.ChatMessage
 import com.example.ui.ChatViewModel
+import com.example.ui.MaieutikaViewModel
 import com.example.ui.theme.GoldAccent
 import com.example.ui.theme.GoldContainer
 import com.example.ui.theme.GoldLight
@@ -67,7 +71,7 @@ import com.example.ui.theme.SoftWhite
 
 @Composable
 fun ChatScreen(
-    chatViewModel: ChatViewModel,
+    viewModel: MaieutikaViewModel,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -75,7 +79,7 @@ fun ChatScreen(
         onBack()
     }
 
-    val uiState by chatViewModel.uiState.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
 
@@ -112,14 +116,14 @@ fun ChatScreen(
 
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "DIALOG SOKRATES",
+                    text = "DIALOG SOKRATIK",
                     style = MaterialTheme.typography.titleMedium,
                     color = GoldLight,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 )
                 Text(
-                    text = "Google AI SDK • Pertanyaan Reflektif",
+                    text = "MAIEUTIKA • Co-Partner Kognitif",
                     style = MaterialTheme.typography.labelSmall,
                     color = SlateGray,
                     fontSize = 10.sp
@@ -127,7 +131,7 @@ fun ChatScreen(
             }
 
             IconButton(
-                onClick = { chatViewModel.clearChat() },
+                onClick = { viewModel.clearChat() },
                 modifier = Modifier.testTag("clear_chat_button")
             ) {
                 Icon(
@@ -147,14 +151,25 @@ fun ChatScreen(
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             shape = RoundedCornerShape(10.dp)
         ) {
-            Text(
-                text = "\"Saya tidak akan memberi Anda jawaban. Saya akan membantu Anda melihat.\"",
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontStyle = FontStyle.Italic,
-                    color = GoldLight
-                ),
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-            )
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Psychology,
+                    contentDescription = null,
+                    tint = GoldAccent,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "\"Saya tidak akan memberi Anda jawaban. Saya akan membantu Anda melihat.\"",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontStyle = FontStyle.Italic,
+                        color = GoldLight
+                    )
+                )
+            }
         }
 
         // Message List
@@ -207,11 +222,53 @@ fun ChatScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = "Menimbang realitas & merumuskan pertanyaan...",
+                                    text = "Menimbang realitas & merumuskan pertanyaan penyelidik...",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = SlateGray
                                 )
                             }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Suggested Socratic Probing Question Chips
+        if (uiState.suggestedProbingQuestions.isNotEmpty() && !uiState.isTyping) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "Pertanyaan Penyelidik (Probing Inquiry):",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = SlateGray,
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(bottom = 4.dp)
+                ) {
+                    items(uiState.suggestedProbingQuestions) { question ->
+                        Surface(
+                            color = Color(0xFF1B1B28),
+                            border = BorderStroke(1.dp, GoldAccent.copy(alpha = 0.4f)),
+                            shape = RoundedCornerShape(16.dp),
+                            modifier = Modifier
+                                .clickable {
+                                    viewModel.selectSuggestedQuestion(question)
+                                }
+                                .testTag("probing_question_chip")
+                        ) {
+                            Text(
+                                text = question,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = GoldLight,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                maxLines = 1
+                            )
                         }
                     }
                 }
@@ -259,7 +316,7 @@ fun ChatScreen(
                     onClick = {
                         val toSend = inputText
                         inputText = ""
-                        chatViewModel.sendMessage(toSend)
+                        viewModel.sendMessage(toSend)
                     },
                     enabled = inputText.isNotBlank() && !uiState.isTyping,
                     modifier = Modifier
@@ -278,6 +335,20 @@ fun ChatScreen(
             }
         }
     }
+}
+
+// Backward-compatible overload for ChatViewModel
+@Composable
+fun ChatScreen(
+    chatViewModel: ChatViewModel,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    ChatScreen(
+        viewModel = chatViewModel,
+        onBack = onBack,
+        modifier = modifier
+    )
 }
 
 @Composable
